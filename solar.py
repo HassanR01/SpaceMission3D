@@ -3,10 +3,11 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import math
+import random
 
 # Constants
 SUN_RADIUS = 2.0
-PLANET_RADIUS = [0.4, 0.9, 1.0, 1.05, 1.9, 1.3, 1.2]  # Adjusted radii of the planets
+PLANET_RADIUS = [0.4, 0.9, 1.0, 1.05, 2, 1.5, 1.3]  # Adjusted radii of the planets
 PLANET_DISTANCE = [4, 7, 10, 15, 22, 28, 34]  # Adjusted distances of the planets from the sun
 PLANET_PERIOD = [0.24, 0.62, 1.0, 1.88, 11.86, 29.46, 84.07]  # Orbital periods of the planets (in Earth years)
 PLANET_COLORS = [
@@ -21,7 +22,7 @@ PLANET_COLORS = [
 
 # Initialize Pygame and set up the display
 pygame.init()
-width, height = 800, 600
+width, height = 1200, 800
 pygame.display.set_mode((width, height), DOUBLEBUF | OPENGL)
 pygame.display.set_caption("3D Solar System")
 
@@ -36,6 +37,10 @@ glTranslatef(0.0, 0.0, -camera_distance)
 planet_velocities = [0.0] * len(PLANET_PERIOD)
 planet_periods = list(PLANET_PERIOD)
 
+# Generate star positions
+num_stars = 1000
+star_positions = [(random.uniform(-50, 50), random.uniform(-50, 50), random.uniform(-50, 50)) for _ in range(num_stars)]
+
 # Function to draw the orbit of a planet
 def draw_orbit(distance):
     glBegin(GL_LINE_LOOP)
@@ -45,6 +50,15 @@ def draw_orbit(distance):
         y = distance * math.sin(angle)
         glVertex3f(x, y, 0.0)
     glEnd()
+
+# Function to draw stars in the background
+def draw_stars():
+    glColor3fv((1, 1, 1))
+    for position in star_positions:
+        glPushMatrix()
+        glTranslatef(*position)
+        gluSphere(gluNewQuadric(), 0.1, 5, 5)
+        glPopMatrix()
 
 # Main loop
 clock = pygame.time.Clock()
@@ -77,6 +91,9 @@ while True:
         glRotatef(y, 1, 0, 0)
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+    # Draw stars
+    draw_stars()
 
     # Draw the sun
     glColor3fv((1, 1, 0))
